@@ -1,0 +1,24 @@
+{
+    "zwGet": {
+        "lambda": {
+            "id": "8ZISAwVo",
+            "password": "1234"
+        },
+        "apigateway": {
+            "path": "/zwGet",
+            "method": {
+                "value": "GET",
+                "items": [
+                    "GET",
+                    "POST",
+                    "PUT",
+                    "DELETE",
+                    "HEAD",
+                    "OPTIONS",
+                    "PATCH"
+                ]
+            },
+            "queryString": "id=8ZISAwVo&password=1234"
+        }
+    }
+}
