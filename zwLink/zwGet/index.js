@@ -115,11 +115,19 @@ exports.handler = async(event) => {
 
         // the id is in "path":"/aoaCCjW2"
         // get rid of leading slash
-        let id = event.path.replace(/^\//, "");
-        body = {id: id};
-        body.password = null;
-        if (event.queryStringParameters && event.queryStringParameters.password) body.password = event.queryStringParameters.password;
-        body.fromGetLinkPath = true;
+        if (event.path && typeof(event.path) == "string") {
+            let id = event.path.replace(/^\//, "");
+            body = {id: id};
+            body.password = null;
+            if (event.queryStringParameters && event.queryStringParameters.password) body.password = event.queryStringParameters.password;
+            body.fromGetLinkPath = true;
+        } else {
+            // if we get here its basically an error
+            body = {
+                id: "error",
+                from: "should have been from path via proxy+ setting in API gateway",
+            }
+        }
     }
     else {
         body = event;
@@ -206,6 +214,8 @@ exports.handler = async(event) => {
                     // result.body.dateTimeExpires = expireDateTime.toISOString();
                     if (expireDateTime < new Date()) {
                         isWasExpired = true;
+                        result.body.longUrl = "(can't reveal since expired)";
+                        result.body.success = false;
                     }
                 }
                 

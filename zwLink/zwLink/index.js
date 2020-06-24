@@ -7,7 +7,8 @@
 you can POST application/json with 
 {
     "sessionkey":"(your zipwhip valid sessionkey)",
-    "accountPhoneNum":"(your zw acct phone number)",
+    "accountPhoneNum":"+12065823770",
+    "toPhoneNum":"+18559479446",
     "longUrl":"http://example.com/asdf-asdf-asdf.jpg"
 }
 we return a shortened url
@@ -80,6 +81,7 @@ exports.handler = async(event) => {
 
     if (!body.sessionkey) return getError(result, "Error JSON did not contain sessionkey.");
     if (!body.accountPhoneNum) return getError(result, "Error JSON did not contain accountPhoneNum.");
+    if (!body.toPhoneNum) return getError(result, "Error JSON did not contain toPhoneNum.");
     if (!body.longUrl) return getError(result, "Error JSON did not contain longUrl.");
 
     // if we get here we have our values
@@ -107,7 +109,7 @@ exports.handler = async(event) => {
     switch (action) {
         case 'createTinyUrl':
             // var dbRet = await scanTable();
-            var dbRet = await writeToDb(randString, body.longUrl, body.sessionkey, body.accountPhoneNum, body.isPasswordProtected, body.passwordLength, password, body.expireSeconds);
+            var dbRet = await writeToDb(randString, body.longUrl, body.sessionkey, body.accountPhoneNum, body.toPhoneNum, body.isPasswordProtected, body.passwordLength, password, body.expireSeconds);
             if (dbRet.success) {
                 // good to go
             }
@@ -133,6 +135,7 @@ exports.handler = async(event) => {
         longUrl: body.longUrl,
         sessionkey: body.sessionkey,
         accountPhoneNum: body.accountPhoneNum,
+        toPhoneNum: body.toPhoneNum,
         // action: action,
         isPasswordProtected: body.isPasswordProtected,
         passwordLength: body.passwordLength,
@@ -148,7 +151,7 @@ exports.handler = async(event) => {
 
 };
 
-const writeToDb = async function(randString, longUrl, sessionkey, phoneNum, isPasswordProtected, passwordLength, password, expireSeconds) {
+const writeToDb = async function(randString, longUrl, sessionkey, accountPhoneNum, toPhoneNum, isPasswordProtected, passwordLength, password, expireSeconds) {
 
     console.log("writeToDb. randString:", randString, "longUrl:", longUrl);
     let ts = new Date().toISOString();
@@ -156,8 +159,10 @@ const writeToDb = async function(randString, longUrl, sessionkey, phoneNum, isPa
         TableName: "zwLink", // The name of your DynamoDB table
         Item: { // Creating an Item with a unique id and with the passed title
             id: randString,
+        	accountAndToPhoneNumKey: accountPhoneNum + toPhoneNum, // this is a secondary index so can query later for analytics on these 2 fields
             longUrl: longUrl,
-            phoneNum: phoneNum,
+            accountPhoneNum: accountPhoneNum,
+            toPhoneNum: toPhoneNum,
             sessionkey: sessionkey,
             createDate: ts,
             modifyDate: ts,

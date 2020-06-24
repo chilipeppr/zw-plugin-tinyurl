@@ -1,11 +1,12 @@
 {
-    "zwGet": {
+    "zwAnalytics": {
         "lambda": {
-            "id": "0CVUPjmW",
-            "password": "1234"
+            "sessionkey": "asdf-asdf-asdf-asdf",
+            "accountPhoneNum": "+12065823770",
+            "toPhoneNum": "+18559479446"
         },
         "apigateway": {
-            "path": "/zwGet",
+            "path": "/zwAnalytics",
             "method": {
                 "value": "POST",
                 "items": [
@@ -18,10 +19,11 @@
                     "PATCH"
                 ]
             },
-            "queryString": "id=wLiBPvzH&password=2431\n",
             "body": {
-                "id": "0CVUPjmW",
-                "password": "1234"
+                "sessionkey": "asdf-asdf-asdf-asdf",
+                "accountPhoneNum": "+12065823770",
+                "toPhoneNum": "+18559479446",
+                "isDeep": false
             }
         }
     }

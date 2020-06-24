@@ -2,8 +2,9 @@
     "zwLink": {
         "lambda": {
             "sessionkey": "(your zipwhip valid sessionkey)",
-            "accountPhoneNum": "(your zw acct phone number)",
-            "longUrl": "http://example.com/asdf-asdf-asdf.jpg"
+            "accountPhoneNum": "+12065823770",
+            "toPhoneNum": "+18559479446",
+            "longUrl": "http://wwwwwwwwwwww.example.com/asdf-asdf-asdf.jpg"
         },
         "apigateway": {
             "path": "/zwLink",
@@ -21,30 +22,13 @@
             },
             "body": {
                 "sessionkey": "(your zipwhip valid sessionkey)",
-                "accountPhoneNum": "(your zw acct phone number)",
+                "accountPhoneNum": "+12065823770",
+                "toPhoneNum": "+18559479446",
                 "longUrl": "http://example.com/asdf-asdf-asdf.jpg",
                 "isPasswordProtected": true,
                 "xpasswordLength": 8,
                 "expireSeconds": 60
             }
-        }
-    },
-    "zwGet": {
-        "apigateway": {
-            "path": "/zwGet",
-            "method": {
-                "value": "GET",
-                "items": [
-                    "GET",
-                    "POST",
-                    "PUT",
-                    "DELETE",
-                    "HEAD",
-                    "OPTIONS",
-                    "PATCH"
-                ]
-            },
-            "queryString": "id=aoaCCjW2"
         }
     }
 }
