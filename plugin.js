@@ -36,21 +36,15 @@ var myPlugin = {
 
         zw.plugin.addCss(
 "." + this.id + `-composebox-topregion-body {
-    flex-direction: row;
+    flex-direction: column;
     display: flex;
-    xwidth: 100%;
-}
-.` + this.id + `-composebox-topregion-body > input {
-    padding: 2px 8px;
-    width: min-content;
+    width: 100%;
 }
 .` + this.id + `-composebox-topregion > .topregion-iconurl {
     margin-top: 4px;
+    opacity:0.4;
 }
-.` + this.id + `-parsed-date {
-    margin: 4px 0 0 10px;
-}
-.` + this.id + `-mainrow {
+.` + this.id + `-titlerow {
     flex-direction: row;
     display: flex;
     font-size: 12px;
@@ -58,11 +52,10 @@ var myPlugin = {
 .` + this.id + `-title {
     flex-grow:1;
 }
-.` + this.id + `-translatedtext {
-    flex-grow: 1;
-}
-select.` + this.id + `-onoffauto {
-    font-size:12px;
+.` + this.id + `-mainrow {
+    flex-direction: row;
+    display: flex;
+    font-size: 14px;
 }
 `);
         zw.plugin.addCssUrl();
@@ -99,6 +92,8 @@ select.` + this.id + `-onoffauto {
 
         this.btnEl = zw.plugin.getOrCreateComposeBoxBtnBarCss(this.id + "-btn", "TinyURL", this.iconUrlBaseSvg, this.iconUrlHoverSvg, this.iconUrlSelectedSvg, this.onClickComposeBoxBtn.bind(this));
 
+        // watch for all changes to textarea
+        this.attachToTextAreaChangeEvents();
     },
 
     // Setup the close button to hide
@@ -137,7 +132,7 @@ select.` + this.id + `-onoffauto {
 
             // Show the Human Date Time
             regionEl.removeClass("hidden");
-            this.btneEl.find('.iconUrlBaseSvg').addClass("active");
+            this.btnEl.find('.iconUrlBaseSvg').addClass("active");
             console.log("removed hidden class from top region for human date time");
 
             // we should show the default date/time fields
@@ -150,11 +145,7 @@ select.` + this.id + `-onoffauto {
                 
             }
 
-            // now set the textbox with the focus so they can start typing
-            // and select all text so they can immediately replace what's there
-            regionEl.find("input").focus().select();
-            this.onParseTextbox();
-
+            
         } else {
 
             // Hide the Human Date Time
@@ -172,64 +163,13 @@ select.` + this.id + `-onoffauto {
 
     },
 
-    cachedTextboxEl: null, // cached element for textbox
-    cachedParsedDateEl: null, // cached element for the parsed date
+    showTopRegion: function() {
+        var regionEl = $('.' + this.id + '-composebox-topregion');
+        console.log("showTopRegion. regionEl:", regionEl);
 
-    onParseTextbox: function(evt) {
-
-        // Get textbox val
-        //var txtBoxEl = $("." + this.id + "-composebox-topregion-body > input");
-        var q = this.cachedTextboxEl.val();
-        // console.log("onParseTextbox. val:", q, "evt:", evt);
-
-        // console.log("chrono:", typeof(chrono));
-        if (typeof(chrono) != 'undefined') {
-
-            var referenceDate = new Date();
-            var result = chrono.parse(q, referenceDate, { forwardDate: true });
-            // var val = chrono.parse(q);
-            // Fri Sep 12 2014 12:00:00 GMT-0500 (CDT)
-            console.log("chrono parsed val:", result);
-
-            // this.cachedParsedDateEl.addClass("alert-success");
-            // this.cachedParsedDateEl.removeClass("alert-warning");
-        
-            // see if got a parsed date
-            if (result && result.length && result.length > 0 && result[0].ref) {
-
-                var d = result[0].start.date();
-
-                // var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                // let options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-                var options = { hour12: true, hour: 'numeric', minute:'2-digit'};
-
-                var txt = "";
-                // txt = d.toLocaleString('en-US', options);
-                // console.log(d.toLocaleDateString("en-US")); // 9/17/2016
-                // console.log(d.toLocaleDateString("en-US", options)); // Saturday, September 17, 2016
-
-                // figure out year. if it's the current year then don't show it, otherwise show 2 digit year
-                var yearTxt = "";
-                var curYr = new Date().getFullYear();
-                if (d.getFullYear() != curYr) yearTxt = "/" + d.getFullYear().toString().replace(/^../, "");
-
-                txt = d.toLocaleDateString([], {weekday:'short'}) + " " + (d.getMonth() + 1) + "/" + d.getDate() + yearTxt + " " +  d.toLocaleTimeString([], options);
-
-                this.cachedParsedDateEl.text(txt);
-
-                // now update the original date/time fields so we actually schedule a text here
-                var origDateEl = $('.send-message-panel_messageAdditional_isScheduling .DateInput_input');
-                var origTimeEl = $('.send-message-panel_messageAdditional_isScheduling .zk-time-picker-input');
-                origDateEl.val(d.toLocaleDateString());
-                origTimeEl.val(d.toLocaleTimeString([], options));
-
-
-            } else {
-                this.cachedParsedDateEl.text("Error parsing");
-            }
-        } else {
-            this.cachedParsedDateEl.text("Chrono not ready...");
-            setTimeout(this.onParseTextbox.bind(this), 1000);
+        if (regionEl && (regionEl.hasClass("hidden") || regionEl.length == 0) ) {
+            // we need to show
+            this.onClickComposeBoxBtn();
         }
     },
 
@@ -238,7 +178,7 @@ select.` + this.id + `-onoffauto {
 
         console.log("Creating top region for human date time");
 
-        regionEl = zw.plugin.getOrCreateComposeBoxTopRegionCss(this.id + '', "Human Date Time", this.iconUrlBaseSvg, "hidden");
+        regionEl = zw.plugin.getOrCreateComposeBoxTopRegionCss(this.id + '', "Zipwhip Link TinyURL", this.iconUrlBaseSvg, "hidden");
         // regionEl.find('.plugin-composebox-topregion-body').text("ABC Apple Pay - Coming soon. Lets you accept payments via Apple Pay.");
         // make x close button clickable
         regionEl.find('.zk-button').click(this.onClickComposeBoxBtn.bind(this));
@@ -249,25 +189,72 @@ select.` + this.id + `-onoffauto {
         var bodyEl = regionEl.find('.plugin-composebox-topregion-body');
         var newEl = $(`
 <div class="` + this.id + `-composebox-topregion-body">
-    <div>Create a Zipwhip Link TinyURL</div>
-    <div>Original URL</div><div>TinyURL</div>
+    <div class="` + this.id + `-titlerow">
+        <div class="` + this.id + `-title">Zipwhip Link TinyURL</div>
+    </div>
+    <div class="` + this.id + `-bodyrow"></div>
 </div>
         `);
         bodyEl.append(newEl);            
 
         // we need to load the javascript library
 
-        // let's setup our cached elements
-        // this way they are quicker to find in the keypress callback
-        this.cachedTextboxEl = newEl.find('input');
-        this.cachedParsedDateEl = newEl.find('.' + this.id + '-parsed-date');
         
-        // we need to attach to the keypress events in the textbox
-        // this.cachedTextboxEl.on('change paste keyup', this.onParseTextbox.bind(this));
-        this.cachedTextboxEl.on('input', this.onParseTextbox.bind(this));
 
         return regionEl;
     },
+
+    attachToTextAreaChangeEvents: function() {
+
+        console.log("textarea: attachToTextAreaChangeEvents.");
+
+        // We are going to watch for changes on the textarea to see if a URL is pasted in
+        this.composeBoxTextAreaEl.on('input change', this.onTextAreaChange.bind(this));
+
+    },
+
+    onTextAreaChange: function(evt) {
+        console.log("textarea: onTextAreaChange. evt:", evt);
+
+        // get html element
+        var el = $('.' + this.id + '-bodyrow');
+        el.html("");
+
+        // has called showTopRegion
+        var isHasCalled = false;
+
+        // see if there is a url
+        var val = this.composeBoxTextAreaEl.val();
+        console.log("val:", val);
+        var re = /(\b(?:https?:|www\.)[^\s]+)/g;
+        while ( match = re.exec(val) ) {
+            var reItem = RegExp.$1;
+
+            // if we find a url, we have to show the top region automatically
+            // but then we have to re-find the element for the bodyrow
+            if (!isHasCalled) {
+                this.showTopRegion();
+                isHasCalled = true;
+                var el = $('.' + this.id + '-bodyrow');
+            }
+
+            console.log("found url via regexp. $1:", reItem);
+            var randString = this.getRandomString(8);
+            el.append('<div><span style="color:gray;">Original URL</span> ' + reItem + ' <span style="color:gray">TinyURL</span> https://zipwhip.link/' + randString + '</div>');
+        }
+    },
+
+    getRandomString: function(len) {
+
+        // Will give you back a random string of chars
+        var characters = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        var ans = '';
+        for (var i = len; i > 0; i--) {
+            ans +=
+                characters[Math.floor(Math.random() * characters.length)];
+        }
+        return ans;
+    }
 
 };
 
