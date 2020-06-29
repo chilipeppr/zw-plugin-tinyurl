@@ -1,7 +1,7 @@
 {
     "zwGet": {
         "lambda": {
-            "id": "0CVUPjmW",
+            "id": "GlGADdY0",
             "password": "1234"
         },
         "apigateway": {
@@ -18,9 +18,9 @@
                     "PATCH"
                 ]
             },
-            "queryString": "id=wLiBPvzH&password=2431\n",
+            "queryString": "id=GlGADdY0&password=2431",
             "body": {
-                "id": "0CVUPjmW",
+                "id": "2Tv9QmHw",
                 "password": "1234"
             }
         }

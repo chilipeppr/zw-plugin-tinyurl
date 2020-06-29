@@ -4,7 +4,16 @@
             "sessionkey": "(your zipwhip valid sessionkey)",
             "accountPhoneNum": "+12065823770",
             "toPhoneNum": "+18559479446",
-            "longUrl": "http://wwwwwwwwwwww.example.com/asdf-asdf-asdf.jpg"
+            "longUrl": "http://example.com/asdf-asdf-asdf.jpg",
+            "isPasswordProtected": true,
+            "xpasswordLength": 8,
+            "expireSeconds": null,
+            "xfile": {
+                "mimeType": "image/png",
+                "origName": "appstore.png",
+                "size": 123543,
+                "lastModDate": "2020-06-04T14:21:02.601Z"
+            }
         },
         "apigateway": {
             "path": "/zwLink",
@@ -27,7 +36,13 @@
                 "longUrl": "http://example.com/asdf-asdf-asdf.jpg",
                 "isPasswordProtected": true,
                 "xpasswordLength": 8,
-                "expireSeconds": 60
+                "expireSeconds": null,
+                "file": {
+                    "mimeType": "image/png",
+                    "origName": "appstore.png",
+                    "size": 123543,
+                    "lastModDate": "2020-06-04T14:21:02.601Z"
+                }
             }
         }
     }

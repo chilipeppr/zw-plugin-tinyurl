@@ -34,6 +34,8 @@ const useragent = require('useragent');
 
 var uuid = require('uuid');
 
+const s3 = new AWS.S3();
+
 exports.handler = async(event) => {
 
     console.log("zwGet event:", typeof(event), event);
@@ -185,9 +187,37 @@ exports.handler = async(event) => {
         case 'getTinyUrl':
             
             var dbRet = await getDb(body.id);
+            console.log("getDb. dbRet:", dbRet);
+            
             if (dbRet.success) {
+        
                 // good to go
-                result.body.longUrl = dbRet.data.longUrl;
+                
+                // let's see if this is an s3 download url
+                // if so, create the url and return that
+                if (dbRet.data.file) {
+                    
+                    // there is an s3. get d/l link
+                    var dbDlRet = await getDownloadURL(dbRet.data.file.s3Key);
+                    if (dbDlRet.success) {
+                        result.body.longUrl = dbDlRet.fileS3DownloadUrl;
+                        
+                        // add file items to the results
+                        result.body.file = {
+                            s3Key: dbDlRet.fileS3Key,
+                            mimeType: dbRet.data.file.mimeType,
+                            size: dbRet.data.file.size,
+                            linkExpireSeconds: dbDlRet.fileS3ExpireSeconds,
+                        }
+                        
+                    } else {
+                        return getError(result, "Error getting s3 download url. msg:" + dbDlRet.err);
+                    }
+                    
+                } else {
+                    // otherwise, just return the longUrl
+                    result.body.longUrl = dbRet.data.longUrl;
+                }
                 result.body.tinyUrl = "https://zipwhip.link/" + body.id;
                 // result.body.data = dbRet.data;
                 
@@ -251,7 +281,7 @@ exports.handler = async(event) => {
                         } else {
                             // password did not match
                             isRedirectToPasswordEntryForm = true;
-                            result.body.longUrl = "(can't reveal until password is correct)";
+                            result.body.longUrl = "(can't reveal until password is correct. You can pass the password as part of the URL like https://zipwhip.link/" + body.id + "?password=1234)";
                             result.body.success = false;
                             
                             // TODO: count amount of attempts
@@ -317,11 +347,11 @@ exports.handler = async(event) => {
         console.log("doing 302 redirect to url:", result.body.longUrl);
     }
     
+    console.log('Result: ', result)
+
     // let's finally stringify the body since
     // API gateway needs it that way
     result.body = JSON.stringify(result.body);
-
-    console.log('Result: ', result)
 
     // return result
     return new Promise((resolve, reject) => {
@@ -329,6 +359,48 @@ exports.handler = async(event) => {
     })
 
 };
+
+// get s3 url
+const getDownloadURL = async function(id) {
+
+    const s3Params = {
+        Bucket: 'zw-fileuploader',
+        Key: id,
+        Expires: 60, // 1 minute expiry
+        // Expires: 60 * 60 * 1, // 1 hour expiration
+    }
+
+    console.log('getDownloadURL: ', s3Params);
+
+    var result = {};
+    try {
+        let downloadURL = await s3.getSignedUrlPromise('getObject', s3Params);
+        
+        console.log("created download url:", downloadURL);
+        
+        if (downloadURL) {
+            result = {
+                success: true,
+                fileS3DownloadUrl: downloadURL,
+                fileS3Key: id,
+                fileS3ExpireSeconds: 60
+            }
+        } else {
+            result = {
+                success: false,
+                err: "Err in return from s3.getSignedUrl. data:" + JSON.stringify(s3Params)
+            }
+        }
+    }
+    catch(e) {
+        result = {
+            success: false,
+            err: "Err creating s3.getSignedUrl. data:" + JSON.stringify(s3Params) + ", err:" + JSON.stringify(e)
+        }
+    }
+
+    return result;
+}
 
 const updateThenGetLongUrlDb = async function(id, sourceIp, userAgent) {
         
